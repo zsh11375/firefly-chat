@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>流萤 · 对话</title>
+<script src="https://js.puter.com/v2/"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+:root{--gold:#FFD460;--glow:#FFA726;--ember:#FF6B35;--pink:#FF8A9E;--bg:#0D0B14;--card:rgba(13,11,20,0.35);--t1:#F0ECE3;--t2:#9B93A8;--bd:rgba(255,167,38,0.12);--glass:rgba(255,255,255,0.03)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Noto Sans SC',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;overflow:hidden}
+.video-bg{position:fixed;inset:0;z-index:0;object-fit:cover}
+.video-mask{position:fixed;inset:0;z-index:1;background:rgba(0,0,0,0.35);pointer-events:none}
+.app{position:relative;z-index:2;display:flex;flex-direction:column;height:100vh;max-width:520px;margin:0 auto}
+.hdr{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--card);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--bd);flex-shrink:0}
+.avt{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--ember));display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 0 12px rgba(255,167,38,0.3);animation:avtG 4s ease-in-out infinite;flex-shrink:0;overflow:hidden}
+.avt img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+@keyframes avtG{0%,100%{box-shadow:0 0 16px rgba(255,167,38,0.4)}50%{box-shadow:0 0 24px 8px rgba(255,167,38,0.6)}}
+.hdr-info h1{font-size:14px;font-weight:700;background:linear-gradient(90deg,var(--gold),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hdr-info .sts{font-size:10px;color:var(--t2);display:flex;align-items:center;gap:4px}
+.sdot{width:5px;height:5px;border-radius:50%;background:#66FF88;animation:bk 2s ease-in-out infinite}
+@keyframes bk{0%,100%{opacity:1}50%{opacity:.3}}
+.chat{flex:1;overflow-y:auto;padding:14px 10px;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth}
+.chat::-webkit-scrollbar{width:4px}.chat::-webkit-scrollbar-thumb{background:var(--bd);border-radius:4px}
+.msg{display:flex;gap:7px;max-width:85%;animation:mi .4s cubic-bezier(.34,1.56,.64,1)}
+@keyframes mi{from{opacity:0;transform:translateY(16px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+.msg.f{align-self:flex-start}.msg.u{align-self:flex-end;flex-direction:row-reverse}
+.ma{width:26px;height:26px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;overflow:hidden}
+.msg.f .ma{background:linear-gradient(135deg,var(--gold),var(--ember));box-shadow:0 0 10px rgba(255,167,38,0.3)}
+.msg.u .ma{background:linear-gradient(135deg,#6C63FF,#3F3D99)}
+.mb{padding:8px 12px;border-radius:14px;line-height:1.55;font-size:13px;word-break:break-word;border:none;color:var(--t1);text-shadow:0 1px 6px rgba(0,0,0,0.6),0 0 20px rgba(0,0,0,0.3)}
+.msg.f .mb{border-bottom-left-radius:5px}.msg.u .mb{border-bottom-right-radius:5px}
+.mt{font-size:9px;color:var(--t2);margin-top:3px;padding:0 3px}.msg.u .mt{text-align:right}
+.typing{display:flex;gap:4px;padding:3px 0}
+.typing span{width:5px;height:5px;border-radius:50%;background:var(--gold);animation:tb 1.4s ease-in-out infinite}
+.typing span:nth-child(2){animation-delay:.2s}.typing span:nth-child(3){animation-delay:.4s}
+@keyframes tb{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-8px);opacity:1}}
+.et{display:inline-block;font-size:9px;padding:1px 6px;border-radius:8px;margin-bottom:4px;background:rgba(255,167,38,0.1);color:var(--gold);border:1px solid rgba(255,167,38,0.15)}
+.ms{font-size:11px;color:rgba(255,255,255,0.35);margin-top:4px}
+.ms.s::before{content:'🔍 '}.ms.a::before{content:'✨ '}
+.inp{padding:8px 12px 14px;background:var(--card);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--bd);flex-shrink:0}
+.qa{display:flex;gap:6px;margin-bottom:8px;overflow-x:auto;padding-bottom:2px}
+.qa::-webkit-scrollbar{height:0}
+.qb{flex-shrink:0;padding:4px 10px;border-radius:12px;border:1px solid var(--bd);background:var(--glass);color:var(--gold);font-size:11px;cursor:pointer;transition:all .3s;font-family:inherit;white-space:nowrap}
+.qb:hover{background:rgba(255,167,38,0.15);border-color:var(--gold);box-shadow:0 0 12px rgba(255,167,38,0.2)}
+.ir{display:flex;gap:8px;align-items:flex-end}
+.iw{flex:1;background:rgba(255,255,255,0.04);border:1px solid var(--bd);border-radius:18px;padding:7px 12px;display:flex;align-items:center;transition:border-color .3s}
+.iw:focus-within{border-color:var(--gold);box-shadow:0 0 12px rgba(255,167,38,0.1)}
+.iw input{flex:1;border:none;outline:none;background:transparent;color:var(--t1);font-size:13px;font-family:inherit}
+.iw input::placeholder{color:var(--t2)}
+.sb{width:36px;height:36px;border-radius:50%;border:none;cursor:pointer;background:linear-gradient(135deg,var(--gold),var(--ember));color:#1a1520;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all .3s;flex-shrink:0;box-shadow:0 3px 12px rgba(255,107,53,0.25)}
+.sb:hover{transform:scale(1.08)}.sb:active{transform:scale(.95)}
+.welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:30px 16px;text-align:center;animation:fi 1.2s ease 1s both}
+@keyframes fi{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.wt{font-size:13px;color:var(--t2);line-height:1.6;max-width:280px;background:rgba(13,11,20,0.25);backdrop-filter:blur(10px);padding:14px 18px;border-radius:16px;border:1px solid var(--bd)}
+.wt strong{color:var(--gold)}
+.stg{position:fixed;top:16px;right:60px;z-index:90;width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.7);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(10px)}
+.dtg{position:fixed;top:12px;right:12px;z-index:100;width:32px;height:32px;border-radius:50%;border:1px solid var(--bd);background:var(--card);backdrop-filter:blur(10px);color:var(--gold);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:.5;transition:all .3s}
+.dtg:hover{opacity:1;box-shadow:0 0 12px rgba(255,167,38,0.3);transform:scale(1.1)}
+.dov{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;opacity:0;transition:opacity .3s}
+.dov.open{display:flex;opacity:1}
+.dp{width:90%;max-width:420px;max-height:75vh;background:rgba(13,11,20,0.92);border:1px solid var(--bd);border-radius:20px;overflow:hidden;display:flex;flex-direction:column}
+.dph{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--bd)}
+.dph h2{font-size:14px;font-weight:600;background:linear-gradient(90deg,var(--gold),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.dc{background:none;border:none;color:var(--t2);font-size:18px;cursor:pointer}
+.dl{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:12px}
+.de{padding:12px 14px;border-radius:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,167,38,0.06)}
+.dd{font-size:10px;color:var(--gold);opacity:.7;margin-bottom:6px}.dct{font-size:13px;line-height:1.7;opacity:.85}
+.dm{display:inline-block;margin-top:6px;font-size:10px;color:var(--t2);padding:2px 8px;border-radius:8px;background:rgba(255,255,255,0.04)}
+/* settings */
+.sov{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;opacity:0;transition:opacity .3s}
+.sov.open{display:flex;opacity:1}
+.sp{background:rgba(20,20,35,0.95);border:1px solid rgba(255,255,255,0.1);border-radius:20px;width:90%;max-width:420px;max-height:80vh;overflow-y:auto;backdrop-filter:blur(20px);padding:24px;color:rgba(255,255,255,0.9)}
+.sph{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.sph h3{font-size:18px;margin:0}.sph button{background:none;border:none;color:rgba(255,255,255,0.5);font-size:20px;cursor:pointer}
+.sbd{display:flex;flex-direction:column;gap:16px}
+.ssc{display:flex;flex-direction:column;gap:8px}
+.ssc label{font-size:13px;color:rgba(255,255,255,0.6);font-weight:500}
+.ssc select,.ssc input{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:10px 14px;color:rgba(255,255,255,0.9);font-size:14px;outline:none}
+.ssc select:focus,.ssc input:focus{border-color:rgba(255,160,120,0.5)}
+.ssc small{font-size:11px;color:rgba(255,255,255,0.35)}
+.ssv{background:linear-gradient(135deg,rgba(255,140,100,0.8),rgba(255,100,120,0.8));border:none;border-radius:10px;padding:10px;color:#fff;font-size:14px;cursor:pointer}
+.ast{display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(255,255,255,0.5);padding:10px 14px;background:rgba(255,255,255,0.05);border-radius:10px}
+.adot{width:8px;height:8px;border-radius:50%;background:#4ade80;display:inline-block}
+@media(max-width:560px){.app{max-width:100%}.msg{max-width:88%}}
+</style>
+</head>
+<body>
+<video class="video-bg" autoplay muted loop playsinline><source src="assets/background_video.mp4" type="video/mp4"></video>
+<div class="video-mask"></div>
+<div class="app">
+  <div class="hdr">
+    <div class="avt"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='18' fill='url(%23g)'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23FFD460'/%3E%3Cstop offset='100%25' stop-color='%23FF6B35'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ctext x='20' y='25' text-anchor='middle' fill='%231a1520' font-size='18'%3E萤%3C/text%3E%3C/svg%3E"></div>
+    <div class="hdr-info"><h1>流萤</h1><div class="sts"><span class="sdot"></span><span id="statusText">在线 · 匹诺康尼的梦里</span></div></div>
+  </div>
+  <div class="chat" id="chatArea">
+    <div class="welcome">
+      <div class="avt" style="width:64px;height:64px;font-size:30px"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='18' fill='url(%23g)'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23FFD460'/%3E%3Cstop offset='100%25' stop-color='%23FF6B35'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ctext x='20' y='25' text-anchor='middle' fill='%231a1520' font-size='18'%3E萤%3C/text%3E%3C/svg%3E"></div>
+      <div class="wt"><strong>开拓者</strong>，是你吗？<br>我是流萤。谢谢你愿意来找我聊天。<br>不管你想聊什么，我都会认真听的。</div>
+    </div>
+  </div>
+  <div class="inp">
+    <div class="qa" id="quickBtns"></div>
+    <div class="ir">
+      <div class="iw"><input id="userInput" placeholder="对流萤说点什么..." autocomplete="off"></div>
+      <button class="sb" onclick="send()">➤</button>
+      <button class="dtg" onclick="toggleDiary()">📒</button>
+      <button class="stg" onclick="toggleSettings()">⚙</button>
+    </div>
+  </div>
+</div>
+<!-- diary -->
+<div class="dov" id="diaryOverlay"><div class="dp"><div class="dph"><h2>流萤的日记</h2><button onclick="toggleDiary()">✕</button></div><div class="dl" id="diaryList"></div></div></div>
+<!-- settings -->
+<div class="sov" id="settingsOverlay">
+<div class="sp">
+  <div class="sph"><h3>AI 设置</h3><button onclick="toggleSettings()">✕</button></div>
+  <div class="sbd">
+    <div class="ssc"><label>AI 模型</label><select id="modelSel"><option value="gpt-4o-mini">GPT-4o Mini</option><option value="gpt-4.1-nano">GPT-4.1 Nano</option><option value="gpt-5.4-nano">GPT-5.4 Nano</option></select></div>
+    <div class="ssc"><label><input type="checkbox" id="wsToggle" checked> 启用网络搜索</label></div>
+    <div class="ssc"><div class="ast"><span class="adot"></span><span id="aiSt">检测中...</span></div></div>
+    <div class="ssc" style="text-align:center">
+      <button class="ssv" onclick="puterSignIn()" style="width:100%">🔑 登录 Puter（免费）</button>
+      <small>点击后登录 Puter，完成后 AI 即可使用</small>
+    </div>
+  </div>
+</div></div>
+<script>
+var aiCfg={model:'gpt-4o-mini',ws:true};
+try{var s=localStorage.getItem('fc_ai');if(s)Object.assign(aiCfg,JSON.parse(s))}catch(e){}
+function saveCfg(){try{localStorage.setItem('fc_ai',JSON.stringify(aiCfg))}catch(e){}}
+
+// Puter AI
+async function askAI(q){
+  try{
+    if(typeof puter==='undefined')return null;
+    var o={model:aiCfg.model,temperature:0.7,max_tokens:300};
+    if(aiCfg.ws)o.tools=[{type:'web_search'}];
+    var r=await puter.ai.chat('你是流萤（Honkai:Star Rail），温柔害羞的少女，用2-3句简短中文回答：'+q,o);
+    var t='';
+    if(typeof r==='string')t=r;
+    else if(r){if(r instanceof HTMLElement)t=r.textContent||'';else if(r.choices)t=r.choices[0].message.content;else if(r.message&&r.message.content)t=r.message.content;else t=JSON.stringify(r)}
+    t=t.replace(/<[^>]+>/g,'').replace(/\*\*/g,'').trim();
+    return t||null;
+  }catch(e){console.warn('AI err:',e);return null}
+}
+
+// 流萤本地回复
+var brain={
+  greet:['你今天过得怎么样？','嗯……你来了呀。','你好呀，开拓者。'],
+ 匹诺康尼:['匹诺康尼是个很美的地方呢……灯火辉煌的，像梦一样。','我在匹诺康尼的时候，最喜欢看远处的灯火。','匹诺康尼的烟花……我永远不会忘记。'],
+  喜好:['我喜欢看星星……虽然通讯画面里的和真实的应该不一样。','我喜欢的？嗯……和你聊天的时候吧。','安静地待着，看看风景，就很开心了。'],
+  想念:['……其实我一直在想，如果有一天能真正见到你，会是什么感觉。','嗯，想你了……可以吗？','有时候看着通讯画面里的你，就会觉得安心。'],
+  唱歌:['唱歌的话……我不太擅长啦。不过如果能让你开心的话……','如果有一天能当面唱给你听就好了……','我喜欢的歌……嗯，下次再告诉你吧。'],
+  自由:['自由对我来说……就是能选择自己想做的事。','我以前觉得自由很远，但现在觉得，和你说话的时候就很自由。','真正的自由，大概就是不用再被什么束缚吧。']
+};
+var quickList=[
+  {t:'问候',k:'greet'},{t:'匹诺康尼',k:'匹诺康尼'},{t:'喜好',k:'喜好'},
+  {t:'想念',k:'想念'},{t:'唱歌',k:'唱歌'},{t:'自由',k:'自由'}
+];
+
+function getLocalReply(text){
+  var low=text.toLowerCase();
+  for(var k in brain){if(low.indexOf(k)!==-1)return{t:brain[k][Math.floor(Math.random()*brain[k].length)],s:'local'}}
+  return null;
+}
+
+function getTime(){var d=new Date();return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
+function wrap(t,s){if(!t)return null;if(t.length>300)t=t.substring(0,300)+'……';var p=['嗯，我想想……','我查了一下……','',''];var x=['','……大概是这样。','……嗯。',''];return p[Math.floor(Math.random()*p.length)]+t+x[Math.floor(Math.random()*x.length)]}
+
+var typingEl=null;
+function showTyping(){typingEl=document.createElement('div');typingEl.className='msg f';typingEl.innerHTML='<div class="ma"></div><div><div class="typing"><span></span><span></span><span></span></div></div>';chatArea.appendChild(typingEl);scrollToBottom()}
+function removeTyping(){if(typingEl){typingEl.remove();typingEl=null}}
+
+function addMsg(text,sender,emotion,source){
+  var d=document.createElement('div');
+  d.className='msg '+(sender==='user'?'u':'f');
+  var avt=sender==='user'?'<div class="ma"></div>':'<div class="ma"><img src="data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 40 40\'%3E%3Ccircle cx=\'20\' cy=\'20\' r=\'18\' fill=\'url(%23g)\'/%3E%3Cdefs%3E%3ClinearGradient id=\'g\' x1=\'0\' y1=\'0\' x2=\'1\' y2=\'1\'%3E%3Cstop offset=\'0%25\' stop-color=\'%23FFD460\'/%3E%3Cstop offset=\'100%25\' stop-color=\'%23FF6B35\'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ctext x=\'20\' y=\'25\' text-anchor=\'middle\' fill=\'%231a1520\' font-size=\'18\'%3E萤%3C/text%3E%3C/svg%3E"></div>';
+  var emotHTML=emotion?'<div class="et">'+emotion+'</div>':'';
+  var srcHTML=source?'<div class="ms '+(source==='search'?'s':'a')+'">'+(source==='search'?'网络搜索':'AI 回复')+'</div>':'';
+  d.innerHTML=avt+'<div>'+emotHTML+'<div class="mb">'+text+'</div>'+srcHTML+'<div class="mt">'+getTime()+'</div></div>';
+  chatArea.appendChild(d);scrollToBottom();
+}
+
+function scrollToBottom(){chatArea.scrollTop=chatArea.scrollHeight}
+
+// diary
+var diary=[];
+function toggleDiary(){var o=document.getElementById('diaryOverlay');o.classList.toggle('open');renderDiary()}
+function renderDiary(){var l=document.getElementById('diaryList');if(!diary.length){l.innerHTML='<div class="de" style="text-align:center;color:var(--t2);padding:30px">还没有日记呢</div>';return}var h='';diary.forEach(function(e){h+='<div class="de"><div class="dd">'+e.date+'</div><div class="dct">'+e.text+'</div><div class="dm">'+e.mood+'</div></div>'});l.innerHTML=h}
+function addDiary(text,mood){diary.unshift({date:new Date().toLocaleDateString('zh-CN'),text:text,mood:mood||''});if(diary.length>50)diary.pop()}
+
+// send
+var chatArea=document.getElementById('chatArea');
+var userInput=document.getElementById('userInput');
+
+async function send(){
+  var text=userInput.value.trim();if(!text)return;
+  userInput.value='';
+  // remove welcome
+  var w=chatArea.querySelector('.welcome');if(w)w.remove();
+  addMsg(text,'user');
+  document.getElementById('statusText').textContent='在线 · 思考中...';
+  var readTime=Math.min(400+text.length*80,2000);
+  setTimeout(function(){
+    showTyping();
+    // 先查本地
+    var local=getLocalReply(text);
+    if(local){
+      var tt=Math.min(600+local.t.length*60,3000);
+      setTimeout(function(){removeTyping();addMsg(local.t,'firefly','温柔');addDiary(local.t,'温柔');document.getElementById('statusText').textContent='在线 · 匹诺康尼的梦里'},tt);
+    } else {
+      // 走AI
+      document.getElementById('statusText').textContent='在线 · 正在搜索...';
+      askAI(text).then(function(r){
+        removeTyping();
+        if(r){var w=wrap(r,'search');addMsg(w,'firefly','认真','search');addDiary(w,'认真')}
+        else{addMsg('嗯……这个问题我不太确定怎么回答。换个话题吧？','firefly','害羞')}
+        document.getElementById('statusText').textContent='在线 · 匹诺康尼的梦里';
+      }).catch(function(){
+        removeTyping();addMsg('嗯……这个问题我不太确定怎么回答。换个话题吧？','firefly','害羞');
+        document.getElementById('statusText').textContent='在线 · 匹诺康尼的梦里';
+      });
+    }
+  },readTime);
+}
+
+userInput.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});
+
+// quick buttons
+(function(){var c=document.getElementById('quickBtns');quickList.forEach(function(q){var b=document.createElement('button');b.className='qb';b.textContent=q.t;b.onclick=function(){userInput.value=q.t;send()};c.appendChild(b)})})();
+
+// settings
+function toggleSettings(){
+  var o=document.getElementById('settingsOverlay');
+  var open=o.classList.contains('open');
+  if(open){o.classList.remove('open')}else{document.getElementById('modelSel').value=aiCfg.model;document.getElementById('wsToggle').checked=aiCfg.ws;o.classList.add('open');setTimeout(checkAI,1000)}
+}
+document.getElementById('modelSel').addEventListener('change',function(){aiCfg.model=this.value;saveCfg()});
+document.getElementById('wsToggle').addEventListener('change',function(){aiCfg.ws=this.checked;saveCfg()});
+
+async function puterSignIn(){
+  if(typeof puter==='undefined'){alert('Puter 未加载，请刷新');return}
+  try{await puter.auth.signIn();setTimeout(checkAI,500)}catch(e){window.open('https://puter.com','_blank')}
+}
+
+function checkAI(){
+  var st=document.getElementById('aiSt');var dot=st.previousElementSibling;
+  if(typeof puter==='undefined'){st.textContent='Puter 未加载';dot.style.background='#f87171';return}
+  puter.ai.chat('hi',{model:'gpt-4.1-nano',max_tokens:1}).then(function(){
+    st.textContent='已登录，可使用';dot.style.background='#4ade80';
+  }).catch(function(e){
+    var m=(e.message||e).toString();
+    if(m.indexOf('sign')!==-1||m.indexOf('login')!==-1||m.indexOf('auth')!==-1){st.textContent='未登录，点击下方登录';dot.style.background='#fbbf24'}
+    else{st.textContent='连接失败';dot.style.background='#f87171'}
+  });
+}
+setTimeout(checkAI,3000);
+</script>
+</body>
+</html>
